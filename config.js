@@ -27,7 +27,10 @@ var settings = {
   code_threshold: 10,
   
   // Supported version of echoprint-codegen codes
-  codever: '4.12'
+  codever: '4.12',
+
+  // Disable or enable the use load from infile code.  This would be faster, but we can't do it on RDS
+  useLoadDataInfile: false
 };
 
 // Override default settings with any local settings

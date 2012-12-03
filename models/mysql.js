@@ -109,9 +109,9 @@ function addTrack(fp, callback) {
     length = parseInt(length, 10);
   
   var sql = 'INSERT INTO tracks ' +
-    '(name,length,import_date) ' +
-    'VALUES (?,?,?)';
-  client.query(sql, [fp.track, length, new Date()],
+    '(codever,name,length,import_date) ' +
+    'VALUES (?,?,?,?)';
+  client.query(sql, [fp.codever, fp.track, length, new Date()],
     function(err, info)
   {
     if (err) return callback(err, null);
@@ -119,21 +119,41 @@ function addTrack(fp, callback) {
     
     var trackID = info.insertId;
     
-    // Write out the codes to a file for bulk insertion into MySQL
-    var tempName = temp.path({ prefix: 'echoprint-' + trackID, suffix: '.csv' });
-    writeCodesToFile(tempName, fp, trackID, function(err) {
-      if (err) return callback(err, null);
-      
-      // Bulk insert the codes
-      sql = 'LOAD DATA INFILE ? IGNORE INTO TABLE codes';
-      client.query(sql, [tempName], function(err, info) {
-        // Remove the temporary file
-        fs.unlink(tempName, function(err2) {
-          if (!err) err = err2;
-          callback(err, trackID);
+    if (config.useLoadDataInfile) {
+      // Write out the codes to a file for bulk insertion into MySQL
+      var tempName = temp.path({ prefix: 'echoprint-' + trackID, suffix: '.csv' });
+      writeCodesToFile(tempName, fp, trackID, function(err) {
+        if (err) return callback(err, null);
+        
+        // Bulk insert the codes
+        sql = 'LOAD DATA INFILE ? IGNORE INTO TABLE codes';
+        client.query(sql, [tempName], function(err, info) {
+          // Remove the temporary file
+          fs.unlink(tempName, function(err2) {
+            if (!err) err = err2;
+            callback(err, trackID);
+          });
         });
       });
-    });
+    }
+    else
+    {
+      var i=0;
+      var valueList=[];
+      sql = 'INSERT IGNORE INTO codes ' +
+        '(code, time, track_id) ' +
+        'VALUES ';
+
+      while (i < fp.codes.length) {
+        valueList.push('('+fp.codes[i]+','+fp.times[i]+','+trackID+')');
+        i++;
+      }
+      
+      sql = sql + valueList.join(',');
+      client.query(sql, function(err, info) {
+        callback(err, trackID);
+      });
+    }  
   });
 }
 

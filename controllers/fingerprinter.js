@@ -341,15 +341,14 @@ function ingest(fp, callback) {
         }
       } else {
         // Track does not exist in the database yet
-        log.debug('Track does not exist in the database yet, status ' +
-          res.status);
+        log.debug('Track does not exist in the database yet, status ' + res.status);
         
         createTrack();
       }
       
       // Function for creating a new track
       function createTrack() {
-        database.addTrack( fp, function(err, trackID) {
+        database.addTrack(fp, function(err, trackID) {
           if (err) { gMutex.release(); return callback(err, null); }
           
           // Success
