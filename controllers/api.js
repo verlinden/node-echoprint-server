@@ -64,7 +64,7 @@ exports.ingest = function(req, res) {
     
     fp.codever = codeVer;
     fp.track = track;
-    fp.length = length;
+    fp.length = parseInt(length);
     
     fingerprinter.ingest(fp, function(err, result) {
       if (err) {
@@ -73,7 +73,7 @@ exports.ingest = function(req, res) {
       }
       
       var duration = new Date() - req.start;
-      log.debug('Ingested new track in ' + duration + 'ms. track_id=' + result.track_id;
+      log.debug('Ingested new track in ' + duration + 'ms. track_id=' + result.track_id);
       
       result.success = true;
       return server.respond(req, res, 200, result);
