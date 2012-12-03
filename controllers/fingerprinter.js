@@ -208,8 +208,6 @@ function getTrackMetadata(match, allMatches, status, callback) {
       return callback('Track ' + match.track_id + ' went missing', null);
     
     match.track = track.name;
-    match.artist = track.artist_name;
-    match.artist_id = track.artist_id;
     match.length = track.length;
     match.import_date = track.import_date;
     
@@ -296,14 +294,12 @@ function getActualScore(fp, match, threshold, slop) {
 
 /**
  * Takes a track fingerprint (includes codes and time offsets plus any
- * available metadata), adds it to the database and returns a track_id,
- * artist_id, and artist name if available.
+ * available metadata), adds it to the database and returns a track_id
  */
 function ingest(fp, callback) {
   var MAX_DURATION = 60 * 10;
   
-  log.info('Ingesting track "' + fp.track + '" by artist "' + fp.artist +
-    '", ' + fp.length + ' seconds, ' + fp.codes.length + ' codes');
+  log.info('Ingesting track "' + fp.track + '", ' + fp.length + ' seconds, ' + fp.codes.length + ' codes');
   
   if (!fp.codes.length || typeof fp.length !== 'number' || !fp.codever)
     return callback('Missing required track fields', null);
@@ -322,118 +318,44 @@ function ingest(fp, callback) {
       if (res.success) {
         var match = res.match;
         log.info('Found existing match with status ' + res.status +
-          ', track ' + match.track_id + ' ("' + match.track + '") by "' +
-          match.artist + '"');
-        
-        var checkUpdateArtist = function() {
-          if (!match.artist && fp.artist) {
-            // Existing artist is unnamed but we have a name now. Check if this
-            // artist name already exists in the database
-            log.debug('Updating track artist');
-            database.getArtistByName(fp.artist, function(err, artist) {
-              if (err) { gMutex.release(); return callback(err, null); }
-              
-              if (artist) {
-                log.debug('Setting track artist_id to ' + artist.artist_id);
-                
-                // Update the track to point to the existing artist
-                database.updateTrack(match.track_id, match.track,
-                  artist.artist_id, function(err)
-                {
-                  if (err) { gMutex.release(); return callback(err, null); }
-                  match.artist_id = artist.artist_id;
-                  match.artist = artist.name;
-                  finished(match);
-                });
-              } else {
-                log.debug('Setting artist ' + artist.artist_id + ' name to "' +
-                  artist.name + '"');
-                
-                // Update the artist name
-                database.updateArtist(match.artist_id, fp.artist,
-                  function(err)
-                {
-                  if (err) { gMutex.release(); return callback(err, null); }
-                  match.artist = fp.artist;
-                  finished(match);
-                });
-              }
-            });
-          } else {
-            if (match.artist != fp.artist) {
-              log.warn('New artist name "' + fp.artist + '" does not match ' +
-                'existing artist name "' + match.artist + '" for track ' +
-                match.track_id);
-            }
-            log.debug('Skipping artist update');
-            finished(match);
-          }
-        };
-        
+          ', track ' + match.track_id + ' ("' + match.track + '")');
+                       
         var finished = function(match) {
           // Success
           log.info('Track update complete');
           gMutex.release();
-          callback(null, { track_id: match.track_id, track: match.track,
-            artist_id: match.artist_id, artist: match.artist });
+          callback(null, { track_id: match.track_id, track: match.track });
         };
         
         if (!match.track && fp.track) {
           // Existing track is unnamed but we have a name now. Update the track
           log.debug('Updating track name to "' + fp.track + '"');
-          database.updateTrack(match.track_id, fp.track, match.artist_id,
+          database.updateTrack(match.track_id, fp.track,
             function(err)
           {
             if (err) { gMutex.release(); return callback(err, null); }
             match.track = fp.track;
-            checkUpdateArtist();
           });
         } else {
           log.debug('Skipping track name update');
-          checkUpdateArtist();
         }
       } else {
         // Track does not exist in the database yet
         log.debug('Track does not exist in the database yet, status ' +
           res.status);
         
-        // Check if we were given an artist name
-        if (fp.artist) {
-          // Does this artist already exist in the database?
-          database.getArtistByName(fp.artist, function(err, artist) {
-            if (err) { gMutex.release(); return callback(err, null); }
-            
-            if (!artist)
-              createArtistAndTrack();
-            else
-              createTrack(artist.artist_id, artist.name);
-          });
-        } else {
-          createArtistAndTrack();
-        }
+        createTrack();
       }
       
-      // Function for creating a new artist and new track
-      function createArtistAndTrack() {
-        database.addArtist(fp.artist, function(err, artistID) {
-          if (err) { gMutex.release(); return callback(err, null); }
-          
-          // Success
-          log.info('Created artist ' + artistID + ' ("' + fp.artist + '")');
-          createTrack(artistID, fp.artist);
-        });
-      }
-      
-      // Function for creating a new track given an artistID
-      function createTrack(artistID, artist) {
-        database.addTrack(artistID, fp, function(err, trackID) {
+      // Function for creating a new track
+      function createTrack() {
+        database.addTrack( fp, function(err, trackID) {
           if (err) { gMutex.release(); return callback(err, null); }
           
           // Success
           log.info('Created track ' + trackID + ' ("' + fp.track + '")');
           gMutex.release();
-          callback(null, { track_id: trackID, track: fp.track,
-            artist_id: artistID, artist: artist });
+          callback(null, { track_id: trackID, track: fp.track });
         });
       }
     });

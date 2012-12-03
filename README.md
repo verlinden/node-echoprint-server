@@ -44,10 +44,8 @@ Required fields:
 Optional fields:
 
 * `track` - Name of the track
-* `artist` - Track artist
 
-The response is a JSON object containing `track_id`, `track`, `artist_id`, 
-`artist` on success or `error` string on failure.
+The response is a JSON object containing `track_id`, `track` on success or `error` string on failure.
  
 ### GET /query?code=...&version=...
 

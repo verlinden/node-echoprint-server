@@ -32,7 +32,6 @@ exports.debugQuery = function(req, res) {
     req.body.version = codeVer;
     req.body.track = json.metadata.title;
     req.body.length = json.metadata.duration;
-    req.body.artist = json.metadata.artist;
     return require('./api').ingest(req, res);
   }
 

@@ -49,7 +49,6 @@ exports.ingest = function(req, res) {
   var codeVer = req.body.version;
   var track = req.body.track;
   var length = req.body.length;
-  var artist = req.body.artist;
   
   if (!code || !codeVer || isNaN(parseInt(length, 10)))
     return server.respond(req, res, 500, { error: 'Missing or invalid required fields' });
@@ -66,7 +65,6 @@ exports.ingest = function(req, res) {
     fp.codever = codeVer;
     fp.track = track;
     fp.length = length;
-    fp.artist = artist;
     
     fingerprinter.ingest(fp, function(err, result) {
       if (err) {
@@ -75,8 +73,7 @@ exports.ingest = function(req, res) {
       }
       
       var duration = new Date() - req.start;
-      log.debug('Ingested new track in ' + duration + 'ms. track_id=' +
-        result.track_id + ', artist_id=' + result.artist_id);
+      log.debug('Ingested new track in ' + duration + 'ms. track_id=' + result.track_id;
       
       result.success = true;
       return server.respond(req, res, 200, result);

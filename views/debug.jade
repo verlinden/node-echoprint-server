@@ -61,7 +61,6 @@ html(lang="en")
           var match = res.matches[i];
           var trackTD = $(document.createElement('td'));
           
-          var artistName = match.artist || '[Unnamed Artist]';
           var trackName = match.track || '[Unnamed Track]';
           
           trackTD.html(match.track_id + '<br>"' + artistName + ' - ' + trackName + '"');

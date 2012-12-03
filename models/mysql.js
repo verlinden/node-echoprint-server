@@ -11,12 +11,8 @@ var config = require('../config');
 exports.fpQuery = fpQuery;
 exports.getTrack = getTrack;
 exports.getTrackByName = getTrackByName;
-exports.getArtist = getArtist;
-exports.getArtistByName = getArtistByName;
 exports.addTrack = addTrack;
-exports.addArtist = addArtist;
 exports.updateTrack = updateTrack;
-exports.updateArtist = updateArtist;
 exports.disconnect = disconnect;
 
 // Initialize the MySQL connection
@@ -82,10 +78,9 @@ function fpQuery(fp, rows, callback) {
 }
 
 function getTrack(trackID, callback) {
-  var sql = 'SELECT tracks.*,artists.name AS artist_name ' +
-    'FROM tracks,artists ' +
-    'WHERE tracks.id=? ' +
-    'AND artists.id=artist_id';
+  var sql = 'SELECT tracks.* ' +
+    'FROM tracks ' +
+    'WHERE tracks.id=? ';
   client.query(sql, [trackID], function(err, tracks) {
     if (err) return callback(err, null);
     if (tracks.length === 1)
@@ -95,13 +90,11 @@ function getTrack(trackID, callback) {
   });
 }
 
-function getTrackByName(track, artistID, callback) {
-  var sql = 'SELECT tracks.*,artists.name AS artist_name ' +
-    'FROM tracks,artists ' +
-    'WHERE tracks.name LIKE ? ' +
-    'AND artist_id=? ' +
-    'AND artists.id=artist_id';
-  client.query(sql, [track, artistID], function(err, tracks) {
+function getTrackByName(track, callback) {
+  var sql = 'SELECT tracks.* ' +
+    'FROM tracks ' +
+    'WHERE tracks.name LIKE ? ';
+  client.query(sql, [track], function(err, tracks) {
     if (err) return callback(err, null);
     if (tracks.length > 0)
       return callback(null, tracks[0]);
@@ -110,49 +103,15 @@ function getTrackByName(track, artistID, callback) {
   });
 }
 
-function getArtist(artistID, callback) {
-  var sql = 'SELECT * FROM artists WHERE id=?';
-  client.query(sql, [artistID], function(err, artists) {
-    if (err) return callback(err, null);
-    if (artists.length === 1) {
-      artists[0].artist_id = artists[0].id;
-      return callback(null, artists[0]);
-    } else {
-      return callback(null, null);
-    }
-  });
-}
-
-function getArtistByName(artistName, callback) {
-  var sql = 'SELECT * FROM artists WHERE name LIKE ?';
-  client.query(sql, [artistName], function(err, artists) {
-    if (err) return callback(err, null);
-    if (artists.length > 0) {
-      artists[0].artist_id = artists[0].id;
-      return callback(null, artists[0]);
-    } else {
-      return callback(null, null);
-    }
-  });
-}
-
-function addTrack(artistID, fp, callback) {
+function addTrack(fp, callback) {
   var length = fp.length;
   if (typeof length === 'string')
     length = parseInt(length, 10);
   
-  // Sanity checks
-  if (!trackID || trackID.length !== 16 ||
-      !artistID || artistID.length !== 16 ||
-      isNaN(length))
-  {
-    return callback('Attempted to add track with missing fields', null);
-  }
-  
   var sql = 'INSERT INTO tracks ' +
-    '(name,artist_id,length,import_date) ' +
-    'VALUES (?,?,?,?)';
-  client.query(sql, [fp.track, artistID, length, new Date()],
+    '(name,length,import_date) ' +
+    'VALUES (?,?,?)';
+  client.query(sql, [fp.track, length, new Date()],
     function(err, info)
   {
     if (err) return callback(err, null);
@@ -198,25 +157,9 @@ function writeCodesToFile(filename, fp, trackID, callback) {
   keepWriting();
 }
 
-function addArtist(name, callback) {
-  var sql = 'INSERT INTO artists (name) VALUES (?)';
-  client.query(sql, [name], function(err, info) {
-    if (err) return callback(err, null);
-    callback(null, info.insertId);
-  });
-}
-
-function updateTrack(trackID, name, artistID, callback) {
-  var sql = 'UPDATE tracks SET name=?, artist_id=? WHERE id=?';
-  client.query(sql, [name, artistID, trackID], function(err, info) {
-    if (err) return callback(err, null);
-    callback(null, info.affectedRows === 1 ? true : false);
-  });
-}
-
-function updateArtist(artistID, name, callback) {
-  var sql = 'UPDATE artists SET name=? WHERE id=?';
-  client.query(sql, [name, artistID], function(err, info) {
+function updateTrack(trackID, name, callback) {
+  var sql = 'UPDATE tracks SET name=? WHERE id=?';
+  client.query(sql, [name, trackID], function(err, info) {
     if (err) return callback(err, null);
     callback(null, info.affectedRows === 1 ? true : false);
   });
