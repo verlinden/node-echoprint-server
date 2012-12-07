@@ -335,10 +335,15 @@ function ingest(fp, callback) {
           {
             if (err) { gMutex.release(); return callback(err, null); }
             match.track = fp.track;
+            gMutex.release();
+            callback(null, { track_id: match.track_id, track: fp.track });
           });
         } else {
           log.debug('Skipping track name update');
+          gMutex.release();
+          callback(null, { track_id: match.track_id, track: fp.track });
         }
+
       } else {
         // Track does not exist in the database yet
         log.debug('Track does not exist in the database yet, status ' + res.status);
