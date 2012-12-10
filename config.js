@@ -6,7 +6,7 @@ var log = require('winston');
 
 var settings = {
   // IP the web server will bind to
-  listen_address: 127.0.0.1,
+  listen_address: '127.0.0.1',
   // Port that the web server will bind to
   web_port: 37760,
   
