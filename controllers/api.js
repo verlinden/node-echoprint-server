@@ -80,3 +80,22 @@ exports.ingest = function(req, res) {
     });
   });
 };
+
+/**
+ * Deletes a track from the database.
+ */
+exports.deletefp = function(req, res) {
+  var url = urlParser.parse(req.url, true);
+  var fp = { track_id: url.query.track_id, track: url.query.track };
+
+  fingerprinter.deleteFingerprint(fp, function(err, result) {
+    if (err) {
+      log.error('Failed to delete track: ' + err);
+      return server.respond(req, res, 500, { error: 'Failed to delete track: ' + err });
+    }
+
+    log.debug('Deleted track ' + result.track_id);
+    result.success = true;
+    return server.respond(req, res, 200, result);
+  }); 
+};

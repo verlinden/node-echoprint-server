@@ -18,6 +18,7 @@ exports.getCodesToTimes = getCodesToTimes;
 exports.bestMatchForQuery = bestMatchForQuery;
 exports.getTrackMetadata = getTrackMetadata;
 exports.ingest = ingest;
+exports.deleteFingerprint = deleteFingerprint;
 exports.SECONDS_TO_TIMESTAMP = SECONDS_TO_TIMESTAMP;
 exports.MATCH_SLOP = MATCH_SLOP;
 
@@ -363,5 +364,35 @@ function ingest(fp, callback) {
         });
       }
     });
+  });
+}
+
+/**
+ * Deletes a track and fingerprint from the database
+ */
+function deleteFingerprint(fp, callback) {
+  gMutex.lock(function() {
+    if(fp.track_id){
+      database.deleteTrack(fp.track_id, function(err, trackID) {
+        if (err) { 
+          gMutex.release();
+          return callback(err, null); 
+        }
+
+        gMutex.release();
+        return callback(null, {track_id: trackID});
+      });
+    }
+    else {
+      database.deleteTrackByName(fp.track, function(err, trackID) {
+        if (err) { 
+          gMutex.release();
+          return callback(err, null); 
+        }
+
+        gMutex.release();
+        return callback(null, {track_id: trackID});
+      });
+    }
   });
 }

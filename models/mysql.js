@@ -13,6 +13,8 @@ exports.getTrack = getTrack;
 exports.getTrackByName = getTrackByName;
 exports.addTrack = addTrack;
 exports.updateTrack = updateTrack;
+exports.deleteTrackByName = deleteTrackByName;
+exports.deleteTrack = deleteTrack;
 exports.disconnect = disconnect;
 
 // Initialize the MySQL connection
@@ -183,6 +185,32 @@ function updateTrack(trackID, name, callback) {
     if (err) return callback(err, null);
     callback(null, info.affectedRows === 1 ? true : false);
   });
+}
+
+function deleteTrackByName(name, callback) {
+  var sql = 'SELECT id FROM tracks WHERE name=?';
+  client.query(sql, [name], function(err, results) {
+    if(err) return callback(err, null);
+    if(results.length === 0)
+      return callback('Track ' + name + ' not found', null);
+    if(results.length > 1)
+      return callback('Multiple tracks found', null);
+    else
+      track = results[0];
+      trackID = String(track['id']);
+      deleteTrack(trackID, function(err, info) {
+        return callback(err, trackID);
+       });
+  });
+}
+
+function deleteTrack(trackID, callback) {
+  var sql = 'DELETE FROM tracks WHERE id=?';
+  client.query(sql, [trackID], function(err, info) {
+    if (err) return callback(err, null);
+    if (info.affectedRows != 1) return callback("AffectedRows was not equal to one when deleting", null); 
+      return callback(null, trackID);
+    });
 }
 
 function disconnect(callback) {

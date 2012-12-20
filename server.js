@@ -31,6 +31,8 @@ function init() {
     if (req.method === 'GET') {
       if (path[1] === 'query')
         return api.query(req, res);
+      if (path[1] === 'deletefp')
+        return api.deletefp(req, res);
       else if (path[1] === 'debug')
         return debug.debugQuery(req, res);
     } else if (req.method === 'POST') {
