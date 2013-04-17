@@ -135,8 +135,10 @@ function bestMatchForQuery(fp, threshold, callback) {
     // If the best result matched fewer codes than our percentage threshold,
     // report no results
     if (matches[0].score < fp.codes.length * MIN_MATCH_PERCENT)
+    {
+      log.debug('Multiple bad match score: ' + matches[0].score + ' found ' + fp.codes.length + ' codes');
       return callback(null, { status: 'MULTIPLE_BAD_HISTOGRAM_MATCH' });
-    
+    }
     // Compute more accurate scores for each track by taking time offsets into
     // account
     var newMatches = [];
@@ -182,16 +184,25 @@ function bestMatchForQuery(fp, threshold, callback) {
     // If the best result actually matched fewer codes than our percentage
     // threshold, report no results
     if (newTopScore < fp.codes.length * MIN_MATCH_PERCENT)
+    {
+      log.debug('Multiple bad match score (percentage): ' + newTopScore + ' found ' + fp.codes.length + ' codes');  
       return callback(null, { status: 'MULTIPLE_BAD_HISTOGRAM_MATCH' });
-    
+    }
+
     // If the actual score was not close enough, then no match
     if (newTopScore <= origTopScore / 2)
+    {
+      log.debug('Multiple bad match score (not close enough): ' + newTopScore + ' found ' + fp.codes.length + ' codes and orig score was ' + origTopScore);
       return callback(null, { status: 'MULTIPLE_BAD_HISTOGRAM_MATCH' });
-    
+    }
+
     // If the difference in actual scores between the first and second matches
     // is not significant enough, then no match 
     if (newTopScore - matches[1].ascore < newTopScore / 2)
+    {
+      log.debug('Multiple bad match score (second match): ' + newTopScore + ' second match score ' + matches[1].ascore);
       return callback(null, { status: 'MULTIPLE_BAD_HISTOGRAM_MATCH' });
+    }
     
     // Fetch metadata for the top track
     getTrackMetadata(topMatch, matches,
