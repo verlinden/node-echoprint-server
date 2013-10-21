@@ -310,18 +310,10 @@ function getActualScore(fp, match, threshold, slop) {
 function ingest(fp, callback) {
   var MAX_DURATION = 60 * 60 * 4;
   
-<<<<<<< HEAD
-  log.info('Ingesting track "' + fp.track + '", ' + fp.length + ' seconds, ' + fp.codes.length + ' codes');
+  log.info('Ingesting track "' + fp.track + '", ' + fp.length + ' seconds, ' + fp.codes.length + ' codes (' + fp.codever + ')');
   
   if (!fp.codes.length || typeof fp.length !== 'number' || !fp.codever)
-    return callback('Missing required track fields', null);
-=======
-  fp.codever = fp.codever || fp.version;
-
-  log.info('Ingesting track "' + fp.track + '" by artist "' + fp.artist +
-    '", ' + fp.length + ' seconds, ' + fp.codes.length + ' codes (' + fp.codever + ')');
->>>>>>> upstream/master
-  
+    return callback('Missing required track fields', null);  
   if (!fp.codes.length)
     return callback('Missing "codes" array', null);
   if (typeof fp.length !== 'number')
@@ -347,59 +339,8 @@ function ingest(fp, callback) {
       if (res.success) {
         var match = res.match;
         log.info('Found existing match with status ' + res.status +
-<<<<<<< HEAD
           ', track ' + match.track_id + ' ("' + match.track + '")');
-                       
-=======
-          ', track ' + match.track_id + ' ("' + match.track + '") by "' +
-          match.artist + '"');
-        
-        var checkUpdateArtist = function() {
-          if (!match.artist) {
-            // Existing artist is unnamed but we have a name now. Check if this
-            // artist name already exists in the database
-            log.debug('Updating track artist');
-            database.getArtistByName(fp.artist, function(err, artist) {
-              if (err) { gMutex.release(); return callback(err, null); }
-              
-              if (artist) {
-                log.debug('Setting track artist_id to ' + artist.artist_id);
-                
-                // Update the track to point to the existing artist
-                database.updateTrack(match.track_id, match.track,
-                  artist.artist_id, function(err)
-                {
-                  if (err) { gMutex.release(); return callback(err, null); }
-                  match.artist_id = artist.artist_id;
-                  match.artist = artist.name;
-                  finished(match);
-                });
-              } else {
-                log.debug('Setting artist ' + artist.artist_id + ' name to "' +
-                  artist.name + '"');
-                
-                // Update the artist name
-                database.updateArtist(match.artist_id, fp.artist,
-                  function(err)
-                {
-                  if (err) { gMutex.release(); return callback(err, null); }
-                  match.artist = fp.artist;
-                  finished(match);
-                });
-              }
-            });
-          } else {
-            if (match.artist != fp.artist) {
-              log.warn('New artist name "' + fp.artist + '" does not match ' +
-                'existing artist name "' + match.artist + '" for track ' +
-                match.track_id);
-            }
-            log.debug('Skipping artist update');
-            finished(match);
-          }
-        };
-        
->>>>>>> upstream/master
+
         var finished = function(match) {
           // Success
           log.info('Track update complete');
@@ -427,43 +368,12 @@ function ingest(fp, callback) {
       } else {
         // Track does not exist in the database yet
         log.debug('Track does not exist in the database yet, status ' + res.status);
-        
-<<<<<<< HEAD
         createTrack();
       }
       
       // Function for creating a new track
       function createTrack() {
         database.addTrack(fp, function(err, trackID) {
-=======
-        // Does this artist already exist in the database?
-        database.getArtistByName(fp.artist, function(err, artist) {
-          if (err) { gMutex.release(); return callback(err, null); }
-          
-          if (!artist)
-            createArtistAndTrack();
-          else
-            createTrack(artist.artist_id, artist.name);
-        });
-      }
-      
-      // Function for creating a new artist and new track
-      function createArtistAndTrack() {
-        log.debug('Adding artist "' + fp.artist + '"')
-        database.addArtist(fp.artist, function(err, artistID) {
-          if (err) { gMutex.release(); return callback(err, null); }
-          
-          // Success
-          log.info('Created artist ' + artistID + ' ("' + fp.artist + '")');
-          createTrack(artistID, fp.artist);
-        });
-      }
-      
-      // Function for creating a new track given an artistID
-      function createTrack(artistID, artist) {
-        log.debug('Adding track "' + fp.track + '" for artist "' + artist  + '" (' + artistID + ')');
-        database.addTrack(artistID, fp, function(err, trackID) {
->>>>>>> upstream/master
           if (err) { gMutex.release(); return callback(err, null); }
           
           // Success

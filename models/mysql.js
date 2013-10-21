@@ -112,25 +112,15 @@ function addTrack(fp, callback) {
   if (typeof length === 'string')
     length = parseInt(length, 10);
   
-<<<<<<< HEAD
-  var sql = 'INSERT INTO tracks ' +
-    '(codever,name,length,import_date) ' +
-    'VALUES (?,?,?,?)';
-  client.query(sql, [fp.codever, fp.track, length, new Date()],
-=======
-  // Sanity checks
-  if (!artistID)
-    return callback('Attempted to add track with missing artistID', null);
   if (isNaN(length) || !length)
     return callback('Attempted to add track with invalid duration "' + length + '"', null);
   if (!fp.codever)
     return callback ('Attempted to add track with missing code version (codever field)', null);
-  
+
   var sql = 'INSERT INTO tracks ' +
-    '(codever,name,artist_id,length,import_date) ' +
-    'VALUES (?,?,?,?,NOW())';
-  client.query(sql, [fp.codever, fp.track, artistID, length],
->>>>>>> upstream/master
+    '(codever,name,length,import_date) ' +
+    'VALUES (?,?,?,NOW())';
+  client.query(sql, [fp.codever, fp.track, length],
     function(err, info)
   {
     if (err) return callback(err, null);
@@ -139,7 +129,6 @@ function addTrack(fp, callback) {
     var trackID = info.insertId;
     var tempName = temp.path({ prefix: 'echoprint-' + trackID, suffix: '.csv' });
     
-<<<<<<< HEAD
     if (config.useLoadDataInfile) {
       // Write out the codes to a file for bulk insertion into MySQL
       var tempName = temp.path({ prefix: 'echoprint-' + trackID, suffix: '.csv' });
@@ -154,22 +143,6 @@ function addTrack(fp, callback) {
             if (!err) err = err2;
             callback(err, trackID);
           });
-=======
-    // Write out the codes to a file for bulk insertion into MySQL
-    log.debug('Writing ' + fp.codes.length + ' codes to temporary file ' + tempName);
-    writeCodesToFile(tempName, fp, trackID, function(err) {
-      if (err) return callback(err, null);
-      
-      // Bulk insert the codes
-      log.debug('Bulk inserting ' + fp.codes.length + ' codes for track ' + trackID);
-      sql = 'LOAD DATA LOCAL INFILE ? IGNORE INTO TABLE codes';
-      client.query(sql, [tempName], function(err, info) {
-        // Remove the temporary file
-        log.debug('Removing temporary file ' + tempName);
-        fs.unlink(tempName, function(err2) {
-          if (!err) err = err2;
-          callback(err, trackID);
->>>>>>> upstream/master
         });
       });
     }

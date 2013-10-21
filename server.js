@@ -54,13 +54,8 @@ function init() {
     respond(req, res, 404, { error: 'Invalid API endpoint' });
   }).addListener('clientError', function(ex) {
     log.warn('Client error: ' + ex);
-<<<<<<< HEAD
   }).listen(config.web_port, config.listen_address);
-=======
-  }).listen(config.web_port);
-
   log.info('HTTP listening on port ' + config.web_port);
->>>>>>> upstream/master
 }
 
 /**

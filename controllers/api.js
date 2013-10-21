@@ -48,11 +48,6 @@ exports.ingest = function(req, res) {
   var code = req.body.code;
   var codeVer = req.body.version;
   var length = req.body.length;
-<<<<<<< HEAD
-=======
-  var track = req.body.track;
-  var artist = req.body.artist;
->>>>>>> upstream/master
   
   if (!code)
     return server.respond(req, res, 500, { error: 'Missing "code" field' });
