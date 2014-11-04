@@ -10,7 +10,7 @@ var config = require('../config');
 exports.query = function(req, res) {
   var url  = urlParser.parse(req.url, true);
   var code = url.query.code;
-  var karaoke = (url.query.karaoke == "true";
+  var karaoke = (url.query.karaoke == "true");
 
   log.debug(karaoke);
 
