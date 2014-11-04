@@ -118,6 +118,8 @@ function cutFPLength(fp, maxSeconds) {
  */
 function bestMatchForQuery(fp, threshold, callback) {
   var mode = fp.karaoke ? 'karaoke' : 'default';
+  log.debu("MIN_MATCH_PERCENT " + MIN_MATCH_PERCENT);
+  log.debu("MIN_MATCH_PERCENT[mode] " + MIN_MATCH_PERCENT[mode]);
 
   fp = cutFPLength(fp);
 
@@ -139,7 +141,7 @@ function bestMatchForQuery(fp, threshold, callback) {
 
     // If the best result matched fewer codes than our percentage threshold,
     // report no results
-    if (matches[0].score < fp.codes.length * MIN_MATCH_PERCENT)
+    if (matches[0].score < fp.codes.length * MIN_MATCH_PERCENT[mode])
     {
       log.debug('Multiple bad match score: ' + matches[0].score + ' found ' + fp.codes.length + ' codes');
       return callback(null, { status: 'MULTIPLE_BAD_HISTOGRAM_MATCH' });
@@ -152,8 +154,8 @@ function bestMatchForQuery(fp, threshold, callback) {
       match.ascore = getActualScore(fp, match, threshold, MATCH_SLOP);
       log.debug('match.ascore' + match.ascore);
       log.debug('fp.codes.length ' + fp.codes.length);
-      log.debug('MIN_MATCH_PERCENT_FOR_TIME_OFFSET ' + MIN_MATCH_PERCENT_FOR_TIME_OFFSET);
-      if (match.ascore && match.ascore >= fp.codes.length * MIN_MATCH_PERCENT_FOR_TIME_OFFSET)
+      log.debug('MIN_MATCH_PERCENT_FOR_TIME_OFFSET ' + MIN_MATCH_PERCENT_FOR_TIME_OFFSET[mode]);
+      if (match.ascore && match.ascore >= fp.codes.length * MIN_MATCH_PERCENT_FOR_TIME_OFFSET[mode])
         newMatches.push(match);
     }
     matches = newMatches;
@@ -169,7 +171,7 @@ function bestMatchForQuery(fp, threshold, callback) {
     // If we only had one track match, just use the threshold to determine if
     // the match is good enough
     if (matches.length === 1) {
-      if (matches[0].ascore / fp.codes.length >= MIN_MATCH_PERCENT_FOR_TIME_OFFSET) {
+      if (matches[0].ascore / fp.codes.length >= MIN_MATCH_PERCENT_FOR_TIME_OFFSET[mode]) {
         // Fetch metadata for the single match
         log.debug('Single good match with actual score ' + matches[0].ascore +
           '/' + fp.codes.length);
@@ -195,7 +197,7 @@ function bestMatchForQuery(fp, threshold, callback) {
 
     // If the best result actually matched fewer codes than our percentage
     // threshold, report no results
-    if (newTopScore < fp.codes.length * MIN_MATCH_PERCENT)
+    if (newTopScore < fp.codes.length * MIN_MATCH_PERCENT[mode])
     {
       log.debug('Multiple bad match score (percentage): ' + newTopScore + ' found ' + fp.codes.length + ' codes');
       return callback(null, { status: 'MULTIPLE_BAD_HISTOGRAM_MATCH' });
