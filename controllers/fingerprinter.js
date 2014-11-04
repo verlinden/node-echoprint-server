@@ -115,9 +115,10 @@ function cutFPLength(fp, maxSeconds) {
  * Finds the closest matching track, if any, to a given fingerprint.
  */
 function bestMatchForQuery(fp, threshold, callback) {
-  log.debug(fp.karaoke);
-  var karaoke = (fp.karaoke != undefined);
-  log.debug('Track best is karaoke: ' + karaoke);
+  var karaoke = fp.karaoke;
+  if (karaoke){
+    MIN_MATCH_PERCENT = 0.7;
+  }
 
   fp = cutFPLength(fp);
 
