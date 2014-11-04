@@ -84,7 +84,7 @@ function inflateCodeString(buf) {
  * Clamp this fingerprint to a maximum N seconds worth of codes.
  */
 function cutFPLength(fp, maxSeconds) {
-  if (!maxSeconds) maxSeconds = 60;
+  if (!maxSeconds) maxSeconds = 360;
 
   var newFP = {};
   for(var key in fp) {
