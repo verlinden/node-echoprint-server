@@ -8,8 +8,10 @@ var database = require('../models/mysql');
 var CHARACTERS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 var SECONDS_TO_TIMESTAMP = 43.45;
 var MAX_ROWS = 30;
-var MIN_MATCH_PERCENT = 0.1;
-var MIN_MATCH_PERCENT_FOR_TIME_OFFSET = 0.05;
+// var MIN_MATCH_PERCENT = 0.1;
+var MIN_MATCH_PERCENT = { 'default': 0.1, 'karaoke': 0.7 }
+// var MIN_MATCH_PERCENT_FOR_TIME_OFFSET = 0.05;
+var MIN_MATCH_PERCENT_FOR_TIME_OFFSET = { 'default': 0.05, 'karaoke': 0.05 }
 var MATCH_SLOP = 2;
 
 // Exports
@@ -115,10 +117,7 @@ function cutFPLength(fp, maxSeconds) {
  * Finds the closest matching track, if any, to a given fingerprint.
  */
 function bestMatchForQuery(fp, threshold, callback) {
-  var karaoke = fp.karaoke;
-  if (karaoke){
-    MIN_MATCH_PERCENT = 0.7;
-  }
+  var mode = fp.karaoke ? 'karaoke' : 'default';
 
   fp = cutFPLength(fp);
 
