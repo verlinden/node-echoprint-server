@@ -118,8 +118,8 @@ function cutFPLength(fp, maxSeconds) {
  */
 function bestMatchForQuery(fp, threshold, callback) {
   var mode = fp.karaoke ? 'karaoke' : 'default';
-  log.debu("MIN_MATCH_PERCENT " + MIN_MATCH_PERCENT);
-  log.debu("MIN_MATCH_PERCENT[mode] " + MIN_MATCH_PERCENT[mode]);
+  log.debug("MIN_MATCH_PERCENT " + MIN_MATCH_PERCENT);
+  log.debug("MIN_MATCH_PERCENT[mode] " + MIN_MATCH_PERCENT[mode]);
 
   fp = cutFPLength(fp);
 
