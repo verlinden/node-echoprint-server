@@ -165,7 +165,7 @@ function bestMatchForQuery(fp, threshold, callback) {
     // If we only had one track match, just use the threshold to determine if
     // the match is good enough
     if (matches.length === 1) {
-      if (matches[0].ascore / fp.codes.length >= MIN_MATCH_PERCENT) {
+      if (matches[0].ascore / fp.codes.length >= MIN_MATCH_PERCENT_FOR_TIME_OFFSET) {
         // Fetch metadata for the single match
         log.debug('Single good match with actual score ' + matches[0].ascore +
           '/' + fp.codes.length);
