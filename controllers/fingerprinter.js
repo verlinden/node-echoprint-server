@@ -9,6 +9,7 @@ var CHARACTERS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 var SECONDS_TO_TIMESTAMP = 43.45;
 var MAX_ROWS = 30;
 var MIN_MATCH_PERCENT = 0.1;
+var MIN_MATCH_PERCENT_FOR_TIME_OFFSET = 0.05;
 var MATCH_SLOP = 2;
 
 // Exports
@@ -147,8 +148,8 @@ function bestMatchForQuery(fp, threshold, callback) {
       match.ascore = getActualScore(fp, match, threshold, MATCH_SLOP);
       log.debug('match.ascore' + match.ascore);
       log.debug('fp.codes.length ' + fp.codes.length);
-      log.debug('MIN_MATCH_PERCENT ' + MIN_MATCH_PERCENT);
-      if (match.ascore && match.ascore >= fp.codes.length * MIN_MATCH_PERCENT)
+      log.debug('MIN_MATCH_PERCENT_FOR_TIME_OFFSET ' + MIN_MATCH_PERCENT_FOR_TIME_OFFSET);
+      if (match.ascore && match.ascore >= fp.codes.length * MIN_MATCH_PERCENT_FOR_TIME_OFFSET)
         newMatches.push(match);
     }
     matches = newMatches;
