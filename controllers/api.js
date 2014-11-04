@@ -8,11 +8,11 @@ var config = require('../config');
  * Querying for the closest matching track.
  */
 exports.query = function(req, res) {
-  var url  = urlParser.parse(req.url, true);
-  var code = url.query.code;
+  var url     = urlParser.parse(req.url, true);
+  var code    = url.query.code;
   var karaoke = (url.query.karaoke == "true");
 
-  log.debug(karaoke);
+  log.debug('Track is karaoke: ' + karaoke);
 
   if (!code)
     return server.respond(req, res, 500, { error: 'Missing code' });
@@ -28,6 +28,7 @@ exports.query = function(req, res) {
     }
 
     fp.codever = codeVer;
+    fp.karaoke = karaoke;
 
     fingerprinter.bestMatchForQuery(fp, config.code_threshold, function(err, result) {
       if (err) {
