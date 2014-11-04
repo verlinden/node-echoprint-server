@@ -141,19 +141,22 @@ function bestMatchForQuery(fp, threshold, callback) {
     }
     // Compute more accurate scores for each track by taking time offsets into
     // account
-    // var newMatches = [];
-    // for (var i = 0; i < matches.length; i++) {
-    //   var match = matches[i];
-    //   match.ascore = getActualScore(fp, match, threshold, MATCH_SLOP);
-    //   if (match.ascore && match.ascore >= fp.codes.length * MIN_MATCH_PERCENT)
-    //     newMatches.push(match);
-    // }
-    // matches = newMatches;
+    var newMatches = [];
+    for (var i = 0; i < matches.length; i++) {
+      var match = matches[i];
+      match.ascore = getActualScore(fp, match, threshold, MATCH_SLOP);
+      log.debug('match.ascore' + match.ascore);
+      log.debug('fp.codes.length ' + fp.codes.length);
+      log.debug('MIN_MATCH_PERCENT ' + MIN_MATCH_PERCENT);
+      if (match.ascore && match.ascore >= fp.codes.length * MIN_MATCH_PERCENT)
+        newMatches.push(match);
+    }
+    matches = newMatches;
 
-    // if (!matches.length) {
-    //   log.debug('No matched tracks after score adjustment');
-    //   return callback(null, { status: 'NO_RESULTS_HISTOGRAM_DECREASED' });
-    // }
+    if (!matches.length) {
+      log.debug('No matched tracks after score adjustment');
+      return callback(null, { status: 'NO_RESULTS_HISTOGRAM_DECREASED' });
+    }
 
     // Sort the matches based on actual score
     matches.sort(function(a, b) { return b.ascore - a.ascore; });
